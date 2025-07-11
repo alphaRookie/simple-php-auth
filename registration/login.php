@@ -16,35 +16,35 @@
         <div class="box form-box">
             <?php
                 include("config.php");
-                if(isset($_POST['submit'])){//if user click 'submit' button, we have to get the data for email and password(if not, shows the form)
-                    $email = mysqli_real_escape_string($con, $_POST['email']);
+                if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])){//check if user has submitted the data (double check) 
+                    $email = mysqli_real_escape_string($con, $_POST['email']); // $con take data from DB
                     $password = mysqli_real_escape_string($con, $_POST['password']);
 
-                    //$result be like: “Yo DB, gimme any user where email = (what user typed) AND password = (what user typed)”
-                    $result = mysqli_query($con, "SELECT * FROM users WHERE Email='$email' AND PASSWORD='$password'") or die("Select error");
-                    //If DB finds that user, this line takes their data and stores it in $row.
+                    // get all data from user where email = (...) AND password = (...)”
+                    $result = mysqli_query($con, "SELECT * FROM users WHERE Email='$email'") or die("Select error");
+                    // unpack the data and stores it in $row (it's associative array)
                     $row = mysqli_fetch_assoc($result);
 
-                    if(is_array($row) && !empty($row)){//“If user was found in DB...”
-                        //Then it saves their info in session memory:
-                        $_SESSION['valid'] = $row['Email'];
-                        $_SESSION['username'] = $row['Username'];
+                    if($row && password_verify($password, $row['Password'])){//`$row` holds whole users data, `$row['Password']` holds the hashed password
+                        //if login success, set these 4 differents sessions:
+                        $_SESSION['email']     = $row['Email'];// what inside ['...'] must be same as what written in DB
+                        $_SESSION['username']  = $row['Username'];
                         $_SESSION['birthdate'] = $row['Birthdate'];
-                        $_SESSION['id'] = $row['Id'];
+                        $_SESSION['id']        = $row['Id'];
+
+                    header("location:home.php");
+                    exit;
                     }
-                    else{//"or if user wasnt found..."
+
+                    else{//if user wasnt found in DB, send back
                         echo "<div class='error_message'>
                                 <p>Wrong Username or password</p>
                               </div> <br>";
                         echo "<a href = 'login.php'> <button class='button'> Go Back </button>";
                     }
-
-                    if(isset($_SESSION['valid'])){//If session is set (user logged in), redirect to home.php
-                        header("location: home.php");
-                    }
                 }
 
-                else{
+                else{//if user hasn't submitted the data
             ?>
                     <header>Login</header>
                     <form action="" method="post">
@@ -63,6 +63,10 @@
                         </div>
 
                         <div class="link">
+                            <a href="forgotpass/forgot_pass.php">Forgot Password?</a>
+                        </div>
+
+                        <div class="link">
                             Dont have account? <a href="register.php">Sign up here!</a>
                         </div>
                     </form>
@@ -71,3 +75,5 @@
     </div>
 </body>
 </html>
+
+buat security kayak register.php

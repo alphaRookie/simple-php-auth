@@ -58,7 +58,7 @@ body{
 }
 
 .button{                      /* ada beberapa gak kepake tapi kubiarin untk ide */
-    height: 25px;
+    height: 40px;
     background:rgb(30, 95, 218);
     border: 0;
     border-radius: 5px;
@@ -79,6 +79,17 @@ body{
 .link a:hover{
     color: red;
 }
+
+.bold { 
+    font-weight: bold; 
+}
+
+.input-error {
+    border: 2px solid red;
+    background-color: #200;
+    color: #fff;
+}
+
 
 /******************** Home ***********************/
 
@@ -102,6 +113,7 @@ body{
     text-decoration: none;
     color: black;
 }
+
 
 .right-links a{
     padding: 0 10px;

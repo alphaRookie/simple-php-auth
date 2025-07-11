@@ -2,8 +2,9 @@
     session_start();
     include("config.php");
     
-    if(!isset($_SESSION['valid'])){//If you're not logged in, kick you out to login
-        header("location: login.php");
+    if(!isset($_SESSION['email'])){// *you can enter to the VIP place if you have reservation time (session time this case)
+        header("location: login.php");// if you're not logged in, kick you out to login
+        exit;
     }
 ?>
 
@@ -23,36 +24,37 @@
             <p>Logo</p>
         </div>
 
-        <div class="right-links">
+        <div class="right-links"> 
             <?php
-            $id = $_SESSION['id'];//home.php is reading the user ID that was saved in login.php
-            $query = mysqli_query($con, "SELECT * FROM users WHERE Id='$id'");
-            $result = mysqli_fetch_assoc($query); //Turn the result into associative array
+                $id     = $_SESSION['id'];//use id to efficiently take user data(faster, safer)
+                $query  = mysqli_query($con, "SELECT * FROM users WHERE Id='$id'") or die("Select error"); // get all data of selected user with ID:..
+                $result = mysqli_fetch_assoc($query); //Turn the result into associative array
 
-            if($result){
-                $res_username   = $result['Username'];
-                $res_email      = $result['Email'];
-                $res_birthdate  = $result['Birthdate'];
-                $res_id         = $result['Id'];
-            }
-            else {
-                $res_username = "Unknown";
-                $res_email = "Unknown";
-                $res_birthdate = "Unknown";
-                $res_id = 0;
-            }
-            // Calculate age if birthdate exists
-            $age = '...';
-            if(!empty($res_birthdate)) {
-                $birthDate = new DateTime($res_birthdate);//birthdate
-                $today = new DateTime();//today
-                $age = $today->diff($birthDate)->y;//calculate age in years
-            }
+                if(!empty($result)){//if it exist then we store it into session
+                    $res_username  = $result['Username'];//follow whats written inside DB
+                    $res_email     = $result['Email'];
+                    $res_birthdate = $result['Birthdate'];
+                    $res_id        = $result['Id'];
+                }
+                else{//if didnt exist show "unknown"
+                    $res_username  = "Unknown";
+                    $res_email     = "Unknown";
+                    $res_birthdate = "Unknown";
+                    $res_id        = 0;
+                }
 
-            echo "<a href='update.php?Id=$res_id'>Change profile</a>";
+                // Calculate age if birthdate exists
+                $age = 'unknown';
+                if(!empty($res_birthdate)) {
+                    $datebirth = new DateTime($res_birthdate);//birthdate
+                    $today     = new DateTime();//today
+                    $age       = $today->diff($datebirth)->y;//calculate age in years
+                }
+
+                echo "<a href='update.php?Id=$res_id'><button class='button'>Change profile</button></a>";//change profile
+                echo "<a href='logout.php'><button class='button'>Logout</button></a>";//logout button
             ?>
 
-            <a href="logout.php"><button class="button">Logout</button></a>
         </div>
     </div>
     </header>
@@ -61,10 +63,10 @@
     <div class="main-box">
         <div class="top">
             <div class="box">
-                <p>Yo <b><?php echo $res_username?></b>, whts up?</p>
+                <p>Yo <b><?php echo htmlspecialchars($res_username); ?></b>, whts up?</p><!-- htmlspecialchars to prevent XSS attacks, usually use to display something-->
             </div>
             <div class="box">
-                <p>Your email is <b><?php echo $res_email?></b></p>
+                <p>Your email is <b><?php echo htmlspecialchars($res_email); ?></b></p>
             </div>
         </div> 
         <div class="bottom">
